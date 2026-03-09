@@ -5,6 +5,7 @@ import { useDirectory } from "../../context/directory"
 import { useConnected } from "../../component/dialog-model"
 import { createStore } from "solid-js/store"
 import { useRoute } from "../../context/route"
+import { useAutoMode } from "../../context/auto-mode"
 
 export function Footer() {
   const { theme } = useTheme()
@@ -19,6 +20,7 @@ export function Footer() {
   })
   const directory = useDirectory()
   const connected = useConnected()
+  const autoMode = useAutoMode()
 
   const [store, setStore] = createStore({
     welcome: false,
@@ -53,6 +55,9 @@ export function Footer() {
     <box flexDirection="row" justifyContent="space-between" gap={1} flexShrink={0}>
       <text fg={theme.textMuted}>{directory()}</text>
       <box gap={2} flexDirection="row" flexShrink={0}>
+        <Show when={autoMode.enabled()}>
+          <text fg={theme.error}>WARN: AUTO</text>
+        </Show>
         <Switch>
           <Match when={store.welcome}>
             <text fg={theme.text}>

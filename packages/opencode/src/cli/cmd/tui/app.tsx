@@ -40,6 +40,7 @@ import { writeHeapSnapshot } from "v8"
 import { PromptRefProvider, usePromptRef } from "./context/prompt"
 import { TuiConfigProvider } from "./context/tui-config"
 import { TuiConfig } from "@/config/tui"
+import { AutoModeProvider, useAutoMode } from "./context/auto-mode"
 
 async function getTerminalBackgroundColor(): Promise<"dark" | "light"> {
   // can't set raw mode if not a TTY
@@ -154,6 +155,7 @@ export function tui(input: {
                                   <PromptStashProvider>
                                     <DialogProvider>
                                       <CommandProvider>
+                                        <AutoModeProvider>
                                         <FrecencyProvider>
                                           <PromptHistoryProvider>
                                             <PromptRefProvider>
@@ -161,6 +163,7 @@ export function tui(input: {
                                             </PromptRefProvider>
                                           </PromptHistoryProvider>
                                         </FrecencyProvider>
+                                        </AutoModeProvider>
                                       </CommandProvider>
                                     </DialogProvider>
                                   </PromptStashProvider>
@@ -213,6 +216,7 @@ function App() {
   const sync = useSync()
   const exit = useExit()
   const promptRef = usePromptRef()
+  const autoMode = useAutoMode()
 
   useKeyboard((evt) => {
     if (!Flag.OPENCODE_EXPERIMENTAL_DISABLE_COPY_ON_SELECT) return
@@ -559,6 +563,23 @@ function App() {
       value: "docs.open",
       onSelect: () => {
         open("https://opencode.ai/docs").catch(() => {})
+        dialog.clear()
+      },
+      category: "System",
+    },
+    {
+      title: autoMode.enabled() ? "Disable auto mode" : "Enable auto mode",
+      value: "app.auto",
+      slash: {
+        name: "auto",
+      },
+      onSelect: (dialog) => {
+        autoMode.toggle()
+        toast.show({
+          variant: autoMode.enabled() ? "warning" : "info",
+          message: autoMode.enabled() ? "Auto mode enabled - all commands will be auto-approved" : "Auto mode disabled",
+          duration: 3000,
+        })
         dialog.clear()
       },
       category: "System",

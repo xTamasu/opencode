@@ -77,6 +77,7 @@ import { Filesystem } from "@/util/filesystem"
 import { Global } from "@/global"
 import { PermissionPrompt } from "./permission"
 import { QuestionPrompt } from "./question"
+import { useAutoMode } from "../../context/auto-mode"
 import { DialogExportOptions } from "../../ui/dialog-export-options"
 import { formatTranscript } from "../../util/transcript"
 import { UI } from "@/cli/ui.ts"
@@ -200,6 +201,18 @@ export function Session() {
 
   const toast = useToast()
   const sdk = useSDK()
+
+  const autoMode = useAutoMode()
+  createEffect(() => {
+    if (!autoMode.enabled()) return
+    const pending = permissions()
+    for (const request of pending) {
+      sdk.client.permission.reply({
+        reply: "once",
+        requestID: request.id,
+      })
+    }
+  })
 
   // Handle initial prompt from fork
   createEffect(() => {
